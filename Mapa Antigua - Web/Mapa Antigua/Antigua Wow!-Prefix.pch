@@ -1,0 +1,31 @@
+//
+// Prefix header for all source files of the 'Mapa Antigua' target in the 'Mapa Antigua' project
+//
+
+#import <Availability.h>
+
+#ifndef __IPHONE_5_0
+#warning "This project uses features only available in iOS SDK 5.0 and later."
+#endif
+
+#ifdef __OBJC__
+    #import <UIKit/UIKit.h>
+    #import <Foundation/Foundation.h>
+
+#define flechaizquierda @"f1.png"
+#define fuente [UIFont fontWithName:@"Helvetica-Bold" size:20]
+#define facebookimg @"fb.png"
+#define twitterimg @"twit.png"
+#define busquedaicono @"lup.png"
+#define imagenbrujula @"Brujula.png"
+#define imagentuercabarra @"tu2.png"
+
+//iPhone
+#define colortablaiphone [UIColor blackColor]
+#define colortextoceldaiphone [UIColor whiteColor]
+//iPad
+#define colortablaipad [UIColor blackColor]
+#define colortextoceldaipad [UIColor whiteColor]
+
+#define paginawebapplicacion @"gouwmaps.com"
+#endif
