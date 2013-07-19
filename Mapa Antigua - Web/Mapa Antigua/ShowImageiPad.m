@@ -8,7 +8,6 @@
 #define tiempo 0.25
 
 #import <QuartzCore/QuartzCore.h>
-#import <Socialize/Socialize.h>
 
 #import "ShowImageiPad.h"
 
@@ -116,21 +115,22 @@
     [params setObject:logoData forKey:@"source"];
     [params setObject:@"Aqui en Antigua!" forKey:@"caption"];
     
-    [SZFacebookUtils postWithGraphPath:@"me/photos" params:params success:^(id info) {
-        NSLog(@"Created post: %@", info);
-    } failure:^(NSError *error) {
-        NSLog(@"Failed to post: %@", [error localizedDescription]);
-    }];
-    
+    /*
+     [SZFacebookUtils postWithGraphPath:@"me/photos" params:params success:^(id info) {
+     NSLog(@"Created post: %@", info);
+     } failure:^(NSError *error) {
+     NSLog(@"Failed to post: %@", [error localizedDescription]);
+     }];
+     */
     NSString *mensaje2;
     if (selectidioma.idioma == 0) {
         mensaje2 = @"You've share this place on your wall";
     }else{
         mensaje2 = @"Compartiste este lugar en tu muro";
     }
-    UIAlertView *message = [[UIAlertView alloc] initWithTitle:@"Facebook" 
+    UIAlertView *message = [[UIAlertView alloc] initWithTitle:@"Facebook"
                                                       message:mensaje2
-                                                     delegate:self 
+                                                     delegate:self
                                             cancelButtonTitle:@"Ok"
                                             otherButtonTitles:nil];
     [message show];
@@ -148,7 +148,7 @@
 -(void)configurartweet{
     tweet = [[TWTweetComposeViewController alloc] init];
     
-    TWTweetComposeViewControllerCompletionHandler completionHandler = 
+    TWTweetComposeViewControllerCompletionHandler completionHandler =
     ^(TWTweetComposeViewControllerResult result) {
         
         switch (result){
@@ -246,7 +246,7 @@
     if (selectidioma.idioma == 0) urlimagen = auxlocal.imagening;
     else urlimagen = auxlocal.imagen;
     
-    NSURL *url = [NSURL URLWithString:urlimagen]; 
+    NSURL *url = [NSURL URLWithString:urlimagen];
     NSString *nombrearchivo = url.lastPathComponent;
     
     NSString *docDir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
@@ -292,7 +292,7 @@
     UIView *v2 = [[UIView alloc]initWithFrame:CGRectMake(0, 0, images.size.width, images.size.height)];
     [v2 addSubview:button2];
     UIBarButtonItem *twitterButton = [[UIBarButtonItem alloc]initWithCustomView:v2];
-        
+    
     self.navigationItem.rightBarButtonItems = [NSArray arrayWithObjects:twitterButton,facebookButton, nil];
     
     [self.navigationController.navigationBar setAlpha:10];
@@ -310,7 +310,7 @@
     [self ajustarimagen];
 }
 
-- (void) observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object 
+- (void) observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object
                          change:(NSDictionary *)change context:(void *)context
 {
     if (object == self.queue && [keyPath isEqualToString:@"operations"]) {
@@ -321,7 +321,7 @@
         }
     }
     else {
-        [super observeValueForKeyPath:keyPath ofObject:object 
+        [super observeValueForKeyPath:keyPath ofObject:object
                                change:change context:context];
     }
 }
@@ -379,8 +379,8 @@
 }
 
 -(void)viewDidAppear:(BOOL)animated{
-        [self ajustarimagen];
-        self.contentSizeForViewInPopover = sizepop;
+    [self ajustarimagen];
+    self.contentSizeForViewInPopover = sizepop;
     [super viewDidAppear:animated];
 }
 
@@ -402,7 +402,7 @@
 }
 
 - (IBAction)abrirurl:(id)sender {
-    NSString *url = auxlocal.paginaweb;  
+    NSString *url = auxlocal.paginaweb;
     
     
     url = [url stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];

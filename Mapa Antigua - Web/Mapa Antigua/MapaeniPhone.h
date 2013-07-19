@@ -8,9 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "AppDelegate.h"
-#import "local.h"
 #import "locacion.h"
-#import "Idioma.h"
 #import "Servicio.h"
 #import "Categoria.h"
 #import "Tipo.h"

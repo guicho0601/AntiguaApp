@@ -10,7 +10,6 @@
 
 #import "Ofertas.h"
 #import <QuartzCore/QuartzCore.h>
-#import <Socialize/Socialize.h>
 
 @implementation Ofertas
 @synthesize imageView;
@@ -116,21 +115,22 @@
     [params setObject:logoData forKey:@"source"];
     [params setObject:@"Aqui en Antigua!" forKey:@"caption"];
     
-    [SZFacebookUtils postWithGraphPath:@"me/photos" params:params success:^(id info) {
-        NSLog(@"Created post: %@", info);
-    } failure:^(NSError *error) {
-        NSLog(@"Failed to post: %@", [error localizedDescription]);
-    }];
-    
+    /*
+     [SZFacebookUtils postWithGraphPath:@"me/photos" params:params success:^(id info) {
+     NSLog(@"Created post: %@", info);
+     } failure:^(NSError *error) {
+     NSLog(@"Failed to post: %@", [error localizedDescription]);
+     }];
+     */
     NSString *mensaje2;
     if (selectidioma.idioma == 0) {
         mensaje2 = @"You've share this place on your wall";
     }else{
         mensaje2 = @"Compartiste este lugar en tu muro";
     }
-    UIAlertView *message = [[UIAlertView alloc] initWithTitle:@"Facebook" 
+    UIAlertView *message = [[UIAlertView alloc] initWithTitle:@"Facebook"
                                                       message:mensaje2
-                                                     delegate:self 
+                                                     delegate:self
                                             cancelButtonTitle:@"Ok"
                                             otherButtonTitles:nil];
     [message show];
@@ -147,7 +147,7 @@
 -(void)configurartweet{
     tweet = [[TWTweetComposeViewController alloc] init];
     
-    TWTweetComposeViewControllerCompletionHandler completionHandler = 
+    TWTweetComposeViewControllerCompletionHandler completionHandler =
     ^(TWTweetComposeViewControllerResult result) {
         
         switch (result){
@@ -235,7 +235,7 @@
     if (selectidioma.idioma == 0) urlimagen = auxlocal.imagening;
     else urlimagen = auxlocal.imagen;
     
-    NSURL *url = [NSURL URLWithString:urlimagen]; 
+    NSURL *url = [NSURL URLWithString:urlimagen];
     NSString *nombrearchivo = url.lastPathComponent;
     
     NSString *docDir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
@@ -248,7 +248,7 @@
     NSData *imgData = [NSData dataWithContentsOfFile:fotointerna];
     UIImage *thumbNail = [[UIImage alloc] initWithData:imgData];
     [imageView setImage:thumbNail];
-   
+    
     [self ajustarimagen];
 }
 
@@ -310,38 +310,38 @@
     
     UIBarButtonItem *confButton = nil;
     
-     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
-    
-         UIImage *image3 = [UIImage imageNamed:imagentuercabarra];
-         UIButton *boton3 = [UIButton buttonWithType:UIButtonTypeCustom];
-         [boton3 setBackgroundImage:[image3 stretchableImageWithLeftCapWidth:7.0 topCapHeight:0.0] forState:UIControlStateNormal];
-         boton3.frame = CGRectMake(0, 0, image3.size.width, image3.size.height);
-         [boton3 addTarget:self action:@selector(cambiolenguaje:) forControlEvents:UIControlEventTouchUpInside];
-         UIView *v3 = [[UIView alloc]initWithFrame:CGRectMake(0, 0, image3.size.width, image3.size.height)];
-         [v3 addSubview:boton3];
-         confButton = [[UIBarButtonItem alloc]initWithCustomView:v3];
-    
-    self.navigationItem.rightBarButtonItems = [NSArray arrayWithObjects:twitterButton,facebookButton,confButton, nil];
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
+        
+        UIImage *image3 = [UIImage imageNamed:imagentuercabarra];
+        UIButton *boton3 = [UIButton buttonWithType:UIButtonTypeCustom];
+        [boton3 setBackgroundImage:[image3 stretchableImageWithLeftCapWidth:7.0 topCapHeight:0.0] forState:UIControlStateNormal];
+        boton3.frame = CGRectMake(0, 0, image3.size.width, image3.size.height);
+        [boton3 addTarget:self action:@selector(cambiolenguaje:) forControlEvents:UIControlEventTouchUpInside];
+        UIView *v3 = [[UIView alloc]initWithFrame:CGRectMake(0, 0, image3.size.width, image3.size.height)];
+        [v3 addSubview:boton3];
+        confButton = [[UIBarButtonItem alloc]initWithCustomView:v3];
+        
+        self.navigationItem.rightBarButtonItems = [NSArray arrayWithObjects:twitterButton,facebookButton,confButton, nil];
     }
     [self.navigationController.navigationBar setAlpha:10];
     [self.navigationController.navigationBar setTranslucent:NO];
 }
 
 -(void) detectOrientation {
-    /**if (([[UIDevice currentDevice] orientation] == UIDeviceOrientationLandscapeLeft) || 
-        ([[UIDevice currentDevice] orientation] == UIDeviceOrientationLandscapeRight)) {
-        
-        
-        
-    } else if ([[UIDevice currentDevice] orientation] == UIDeviceOrientationPortrait) {
-        
-        // load view 1
-        
-    } */
-        [self ajustarimagen];
+    /**if (([[UIDevice currentDevice] orientation] == UIDeviceOrientationLandscapeLeft) ||
+     ([[UIDevice currentDevice] orientation] == UIDeviceOrientationLandscapeRight)) {
+     
+     
+     
+     } else if ([[UIDevice currentDevice] orientation] == UIDeviceOrientationPortrait) {
+     
+     // load view 1
+     
+     } */
+    [self ajustarimagen];
 }
 
-- (void) observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object 
+- (void) observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object
                          change:(NSDictionary *)change context:(void *)context
 {
     if (object == self.queue && [keyPath isEqualToString:@"operations"]) {
@@ -352,7 +352,7 @@
         }
     }
     else {
-        [super observeValueForKeyPath:keyPath ofObject:object 
+        [super observeValueForKeyPath:keyPath ofObject:object
                                change:change context:context];
     }
 }
@@ -425,7 +425,7 @@
 
 
 - (IBAction)abrirurl:(id)sender {
-    NSString *url = auxlocal.paginaweb;  
+    NSString *url = auxlocal.paginaweb;
     
     
     url = [url stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
@@ -434,3 +434,46 @@
 }
 
 @end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

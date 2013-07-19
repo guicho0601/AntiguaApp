@@ -10,13 +10,17 @@
 
 #import "Informacionlocal.h"
 #import <QuartzCore/QuartzCore.h>
-#import <Socialize/Socialize.h>
+#import <objc/message.h>
+
+
 
 @implementation Informacionlocal{
     NSMutableArray *imagenesarray;
     UIImage *imagepost;
     UIBarButtonItem *facebookButton;
+    
 }
+@synthesize indicador;
 @synthesize labelTitulo;
 @synthesize descripcionText;
 @synthesize paginawebButton;
@@ -29,85 +33,53 @@
 @synthesize scrollwithimage;
 @synthesize sharebutton;
 @synthesize pageControl;
-@synthesize selectidioma,auxlocal,localseleccionado,delegate,tweet,turista,messageFB;
+@synthesize selectidioma,auxlocal,localseleccionado,delegate,tweet,turista,messageFB,queue,visitado;
 
 -(void)cargarinfolocal{
     if (imagenesarray != nil) {
         [imagenesarray removeAllObjects];
     }
     imagenesarray = [[NSMutableArray alloc]init];
-    sqlite3 *database;
-    sqlite3_stmt *compiledStatement;
-    if(sqlite3_open([appDelegate.databasePath UTF8String], &database) == SQLITE_OK) {
-        
-        NSString *sqlStatement=[NSString stringWithFormat:@"select * from local where nombre = '%@'",localseleccionado];
-        if(sqlite3_prepare_v2(database, [sqlStatement UTF8String], -1, &compiledStatement, NULL) == SQLITE_OK) {
-            while(sqlite3_step(compiledStatement) == SQLITE_ROW) {
-                NSString *idlocal,*nombre,*descripcionesp,*descripcioning,*paginaweb,*imagen;
-                if (sqlite3_column_type(compiledStatement, 0)!=SQLITE_NULL) {
-                    idlocal = [NSString stringWithUTF8String:(char *)sqlite3_column_text(compiledStatement, 0)];
-                }
-                if (sqlite3_column_type(compiledStatement, 1)!=SQLITE_NULL) {
-                    nombre = [NSString stringWithUTF8String:(char *)sqlite3_column_text(compiledStatement, 1)];
-                }
-                if (sqlite3_column_type(compiledStatement, 2)!=SQLITE_NULL) {
-                    descripcionesp = [NSString stringWithUTF8String:(char *)sqlite3_column_text(compiledStatement, 2)];
-                }
-                if (sqlite3_column_type(compiledStatement, 3)!=SQLITE_NULL) {
-                    descripcioning = [NSString stringWithUTF8String:(char *)sqlite3_column_text(compiledStatement, 3)];
-                }
-                if (sqlite3_column_type(compiledStatement, 4)!= SQLITE_NULL) {
-                    paginaweb = [NSString stringWithUTF8String:(char *)sqlite3_column_text(compiledStatement, 4)];
-                }
-                NSString *idservicio = [NSString stringWithUTF8String:(char *)sqlite3_column_text(compiledStatement, 5)];
-                NSString *idcategoria = [NSString stringWithUTF8String:(char *)sqlite3_column_text(compiledStatement, 6)];
-                if (sqlite3_column_type(compiledStatement, 7)!=SQLITE_NULL) {
-                    imagen = [NSString stringWithUTF8String:(char *)sqlite3_column_text(compiledStatement, 7)];
-                }
-                auxlocal.idlocal = [idlocal intValue];
-                auxlocal.nombre = nombre;
-                auxlocal.descripcionesp = descripcionesp;
-                auxlocal.descripcioning = descripcioning;
-                auxlocal.paginaweb = paginaweb;
-                auxlocal.idcategoria = [idcategoria intValue];
-                auxlocal.idservicio = [idservicio intValue];
-                auxlocal.imagen = imagen;
-                if (imagen != nil) {
-                    [imagenesarray addObject:auxlocal.imagen];
-                }
+    
+    NSMutableArray *adat;
+    NSError *error =nil;
+    NSData *data;
+    
+    NSArray *path = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *directorio = [path objectAtIndex:0];
+    NSString *file;
+    file = [directorio stringByAppendingFormat:@"/lugar.txt"];
+    data = [NSData dataWithContentsOfFile:file];
+    
+    adat = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:&error];
+    for (int i=0; i<adat.count; i++){
+        NSDictionary *info = [adat objectAtIndex:i];
+        if ([[info objectForKey:@"idlugar"]intValue]== [localseleccionado intValue]) {
+            auxlocal.idlocal = [[info objectForKey:@"idlugar"]intValue];
+            auxlocal.nombre = [info objectForKey:@"nombre"];
+            auxlocal.descripcionesp = [info objectForKey:@"desesp"];
+            auxlocal.descripcioning = [info objectForKey:@"desing"];
+            auxlocal.paginaweb = [info objectForKey:@"web"];
+            auxlocal.imagen = [info objectForKey:@"imgesp"];
+            if (auxlocal.imagen != nil) {
+                [imagenesarray addObject:auxlocal.imagen];
             }
-        } else {
-            NSLog(@"Query NO");
         }
-        
-        sqlStatement = [NSString stringWithFormat:@"select * from turismo where idlocal = %d",auxlocal.idlocal];
-        if(sqlite3_prepare_v2(database, [sqlStatement UTF8String], -1, &compiledStatement, NULL) == SQLITE_OK) {
-            while(sqlite3_step(compiledStatement) == SQLITE_ROW) {
-                NSString *idlocal,*idimagen,*image;
-                if (sqlite3_column_type(compiledStatement, 0)!=SQLITE_NULL) {
-                    idlocal = [NSString stringWithUTF8String:(char *)sqlite3_column_text(compiledStatement, 0)];
-                }
-                if (sqlite3_column_type(compiledStatement, 1)!=SQLITE_NULL) {
-                   idimagen = [NSString stringWithUTF8String:(char *)sqlite3_column_text(compiledStatement, 1)];
-                }
-                if (sqlite3_column_type(compiledStatement, 2)!=SQLITE_NULL) {
-                    image = [NSString stringWithUTF8String:(char *)sqlite3_column_text(compiledStatement, 2)];
-                }
-                Turismo *aux = [[Turismo alloc]init];
-                aux.idlocal = [idlocal intValue];
-                aux.idimage = [idimagen intValue];
-                aux.imagen = image;
-                [imagenesarray addObject:aux.imagen];
-            }
-        }else{
-            NSLog(@"Query NO");
-        }
-        // Libero la consulta
-        sqlite3_finalize(compiledStatement);
     }
-    // Cierro la base de datos
-    sqlite3_close(database);
-
+    
+    file = [directorio stringByAppendingFormat:@"/img_lugar.txt"];
+    data = [NSData dataWithContentsOfFile:file];
+    adat = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:&error];
+    for (int i=0; i<adat.count; i++){
+        NSDictionary *info = [adat objectAtIndex:i];
+        if ([[info objectForKey:@"lugar"]intValue] == auxlocal.idlocal) {
+            Turismo *aux = [[Turismo alloc]init];
+            aux.idlocal = [[info objectForKey:@"lugar"]intValue];
+            aux.idimage = [[info objectForKey:@"idimagen"]intValue];
+            aux.imagen = [info objectForKey:@"imagen"];
+            [imagenesarray addObject:aux.imagen];
+        }
+    }
 }
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -130,17 +102,18 @@
 -(void)postontwitter:(UIBarButtonItem *)sender{
     NSURL *url = [[NSURL alloc] initWithString:@"twitter.com"];
     [tweet setInitialText:@""];
+    
     NSURL *url2 = [NSURL URLWithString:[imagenesarray objectAtIndex:0]];
     NSString *nombrearchivo = url2.lastPathComponent;
+    NSLog(@"%@",[imagenesarray objectAtIndex:0]);
+    NSArray *array = [[imagenesarray objectAtIndex:0] componentsSeparatedByString:@"/"];
     
     NSString *docDir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-    NSFileManager *fm = [NSFileManager defaultManager];
-    NSString *fotointerna = [NSString stringWithFormat:@"%@/%@",docDir,nombrearchivo];
-    if (![fm fileExistsAtPath:fotointerna]) {
-        NSData *data3= [NSData dataWithContentsOfURL:[NSURL URLWithString:[imagenesarray objectAtIndex:0]]];
-        [data3 writeToFile:fotointerna atomically:YES];
-    }
+    
+    NSString *carpeta = [docDir stringByAppendingFormat:@"/%@",[array objectAtIndex:(array.count -2)]];
+    NSString *fotointerna = [NSString stringWithFormat:@"%@/%@",carpeta,nombrearchivo];
     NSData *imgData = [NSData dataWithContentsOfFile:fotointerna];
+    
     UIImage *thumbNail = [[UIImage alloc] initWithData:imgData];
     [tweet addImage:thumbNail];
     [tweet addURL:url];
@@ -148,10 +121,8 @@
 }
 
 -(void)prepararpostFacebook{
-    FBShowController *fb = [[FBShowController alloc]initWithNibName:nil bundle:nil];
-    [fb setUrlimage:[imagenesarray objectAtIndex:0]];
-    [fb setDelegate:self];
-    [self.navigationController pushViewController:fb animated:YES];
+    PostFB *ps = [[PostFB alloc]init];
+    [ps postwall:auxlocal.idlocal nombre:auxlocal.nombre];
 }
 
 -(void)cerrarFB{
@@ -159,89 +130,25 @@
     [self.navigationController.navigationBar setTranslucent:NO];
 }
 
--(void)sendFB:(NSString *)mensaje{
-    
-    NSURL *url2 = [NSURL URLWithString:[imagenesarray objectAtIndex:0]];
-    NSString *nombrearchivo = url2.lastPathComponent;
-    
-    NSString *docDir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-    NSFileManager *fm = [NSFileManager defaultManager];
-    NSString *fotointerna = [NSString stringWithFormat:@"%@/%@",docDir,nombrearchivo];
-    if (![fm fileExistsAtPath:fotointerna]) {
-        NSData *data3= [NSData dataWithContentsOfURL:[NSURL URLWithString:[imagenesarray objectAtIndex:0]]];
-        [data3 writeToFile:fotointerna atomically:YES];
-    }
-    NSData *imgData = [NSData dataWithContentsOfFile:fotointerna];
-    UIImage *thumbNail = [[UIImage alloc] initWithData:imgData];
-     NSData *logoData = UIImagePNGRepresentation(thumbNail);
-     
-     NSMutableDictionary *params = [NSMutableDictionary dictionary];
-    [params setObject:mensaje forKey:@"message"];
-     [params setObject:logoData forKey:@"source"];
-     [params setObject:@"Aqui en Antigua!" forKey:@"caption"];
-     
-     [SZFacebookUtils postWithGraphPath:@"me/photos" params:params success:^(id info) {
-     NSLog(@"Created post: %@", info);
-     } failure:^(NSError *error) {
-     NSLog(@"Failed to post: %@", [error localizedDescription]);
-     }];
-    
-    NSString *mensaje2;
-    if (selectidioma.idioma == 0) {
-        mensaje2 = @"You've share this place on your wall";
-    }else{
-        mensaje2 = @"Compartiste este lugar en tu muro";
-    }
-    UIAlertView *message = [[UIAlertView alloc] initWithTitle:@"Facebook" 
-                                                      message:mensaje2
-                                                     delegate:self 
-                                            cancelButtonTitle:@"Ok"
-                                            otherButtonTitles:nil];
-    [message show];
-}
 
 -(void)abririmagen:(UITapGestureRecognizer *)sender{
     CGPoint punto = [sender locationInView:self.scrollwithimage];
-    int abc;
+    int abc = 0;
     NSString *imagen;
-    if((UIDeviceOrientationIsPortrait([UIDevice currentDevice].orientation))){
-        CGSize completo = self.view.bounds.size;
-        float medio = completo.width / 2;
-        for (int i=0; i<imagenesarray.count; i++) {
-            float a = medio * i;
-            float b = a + medio;
-            if (punto.x > a && punto.x < b) {
-                abc = i;
-                break;
-            }
-        }
-        
-    }else{
-        CGSize completo = self.view.bounds.size;
-        float medio = completo.width / 2;
-        for (int i =0; i<imagenesarray.count; i++) {
-            float a,b,c,d;
-            if (i>1) {
-                a = medio;
-                b = completo.width;
-            }else{
-                a = 0;
-                b = medio;
-            }
-            if (fmod(i,2) != 0){
-                c = 100;
-                d = 200;
-            }else{
-                c = 0;
-                d = 100;
-            }
-            if ((punto.x > a && punto.x < b)&&(punto.y > c && punto.y < d)) {
-                abc = i;
-                break;
-            }
+    CGSize completo = self.view.bounds.size;
+    float medio = completo.width / 2;
+    for (int i=0; i<imagenesarray.count; i++) {
+        float a = medio * i;
+        float b = a + medio;
+        if (punto.x > a && punto.x < b) {
+            abc = i;
+            break;
         }
     }
     imagen = [imagenesarray objectAtIndex:abc];
+    
+    [autoTimer invalidate];
+    autoTimer =nil;
     
     ShowImage *show = [[ShowImage alloc]init];
     [show setNombreimagen:imagen];
@@ -267,9 +174,9 @@
 
 -(void)iniciaslide{
     autoTimer = [NSTimer scheduledTimerWithTimeInterval:(tiempo)
-                                                 target:self 
-                                               selector:@selector(cambioautomatico) 
-                                               userInfo:nil 
+                                                 target:self
+                                               selector:@selector(cambioautomatico)
+                                               userInfo:nil
                                                 repeats:YES];
 }
 
@@ -284,122 +191,101 @@
     
 }
 
--(void)establecerimagenes:(CGSize)size orientacion:(BOOL)orient{
-    [self limpiarimagen];
-    if (orient) {
-        float medio = size.width/2;
-        for (int i=0; i<[imagenesarray count]; i++) {
-            CGRect frame;
-            frame.origin.x = medio * i;
-            frame.origin.y = 0;
-            frame.size.width = medio;
-            frame.size.height = 120;
-            
-            UIImageView *subimage = [[UIImageView alloc]initWithFrame:frame];
-            NSURL *url = [NSURL URLWithString:[imagenesarray objectAtIndex:i]];
-            NSString *nombrearchivo = url.lastPathComponent;
-            
-            NSString *docDir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-            NSFileManager *fm = [NSFileManager defaultManager];
-            NSString *fotointerna = [NSString stringWithFormat:@"%@/%@",docDir,nombrearchivo];
-            if (![fm fileExistsAtPath:fotointerna]) {
-                NSData *data3= [NSData dataWithContentsOfURL:[NSURL URLWithString:[imagenesarray objectAtIndex:i]]];
-                [data3 writeToFile:fotointerna atomically:YES];
-            }
-            NSData *imgData = [NSData dataWithContentsOfFile:fotointerna];
-            UIImage *thumbNail = [[UIImage alloc] initWithData:imgData];
-            [subimage setImage:thumbNail];
-            if (i == 0) {
-                imagepost = thumbNail;
-            }
-            [self.scrollwithimage addSubview:subimage];
-        }
-    }else{
-        float medio = size.width/2;
-        for (int i=0; i<[imagenesarray count]; i++) {
-            CGRect frame;
-            if (i>1) {
-                frame.origin.x = medio;
-            }else{
-                frame.origin.x = 0;
-            }
-            if (fmod(i,2) != 0){
-                frame.origin.y = 100;
-            }else{
-                frame.origin.y = 0;
-            }
-            //frame.size.width = medio;
-            frame.size.width = 180;
-            frame.size.height = 100;
-            
-            UIImageView *subimage = [[UIImageView alloc]initWithFrame:frame];
-            NSURL *url = [NSURL URLWithString:[imagenesarray objectAtIndex:i]];
-            NSString *nombrearchivo = url.lastPathComponent;
-            
-            NSString *docDir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-            NSFileManager *fm = [NSFileManager defaultManager];
-            NSString *fotointerna = [NSString stringWithFormat:@"%@/%@",docDir,nombrearchivo];
-            if (![fm fileExistsAtPath:fotointerna]) {
-                NSData *data3= [NSData dataWithContentsOfURL:[NSURL URLWithString:[imagenesarray objectAtIndex:i]]];
-                [data3 writeToFile:fotointerna atomically:YES];
-            }
-            NSData *imgData = [NSData dataWithContentsOfFile:fotointerna];
-            UIImage *thumbNail = [[UIImage alloc] initWithData:imgData];
-            [subimage setImage:thumbNail];
-            if (i == 0) {
-                imagepost = thumbNail;
-            }
-            [self.scrollwithimage addSubview:subimage];
-        }
+-(BOOL)isJPEGValid:(NSData *)jpeg{
+    if ([jpeg length] < 4 ) return NO;
+    const char *bytes = (const char *)[jpeg bytes];
+    if (bytes[0] != 0xFF || bytes[1] != 0xD8)  return NO;
+    if (bytes[[jpeg length] - 2]!=0xFF || bytes[[jpeg length]-1]!= 0xD9 )return NO;
+    return YES;
+}
+
+-(void)descargarimagen:(NSString *)url carpeta:(NSString *)car foto:(NSString *)fo{
+    NSLog(@"Descargando...");
+    NSFileManager *fm = [NSFileManager defaultManager];
+    if (![fm fileExistsAtPath:car]) {
+        [fm createDirectoryAtPath:car withIntermediateDirectories:YES attributes:nil error:NULL];
+    }
+    if (![fm fileExistsAtPath:fo]) {
+        NSData *data3= [NSData dataWithContentsOfURL:[NSURL URLWithString:url]];
+        [data3 writeToFile:fo atomically:YES];
+        
     }
 }
 
--(void)posicionarobjetos{
-    BOOL orient;
-    if((UIDeviceOrientationIsPortrait([UIDevice currentDevice].orientation))){
-        CGSize completo = self.view.bounds.size;
-        [self.scroll setFrame:CGRectMake(0, 0, completo.width, completo.height)];
-        [self.labelTitulo setFrame:CGRectMake(0, 0, completo.width, self.labelTitulo.frame.size.height)];
-        [self.descripcionText setFrame:CGRectMake(0, 25, completo.width, self.descripcionText.frame.size.height)];
-        [self.scrollwithimage setFrame:CGRectMake(0, 230,completo.width,120)];
-        [self.paginawebButton setFrame:CGRectMake(0, 355, completo.width, self.paginawebButton.frame.size.height)];
+-(void)establecerimagenes{
+    [self limpiarimagen];
+    CGSize completo = self.view.bounds.size;
+    float medio = completo.width/2;
+    for (int i=0; i<[imagenesarray count]; i++) {
+        CGRect frame;
+        frame.origin.x = medio * i;
+        frame.origin.y = 0;
+        frame.size.width = medio;
+        frame.size.height = 120;
         
-        self.scrollwithimage.contentSize = CGSizeMake(completo.width * 2, 120);
-        orient = TRUE;
-        [self establecerimagenes:completo orientacion:orient];
+        UIImageView *subimage = [[UIImageView alloc]initWithFrame:frame];
+        NSURL *url = [NSURL URLWithString:[imagenesarray objectAtIndex:i]];
+        NSString *nombrearchivo = url.lastPathComponent;
+        url = nil;
+        NSArray *array = [[imagenesarray objectAtIndex:i] componentsSeparatedByString:@"/"];
         
-        [self.scroll addSubview:self.labelTitulo];
-        [self.scroll addSubview:self.descripcionText];
-        [self.scroll addSubview:self.scrollwithimage];
-        [self.scroll addSubview:self.paginawebButton];
-        [self.view addSubview:self.scroll];
-    }else{
-        CGSize completo = self.view.bounds.size;
-        float posscroll;
-        [self.scroll setFrame:CGRectMake(0, 10, completo.width, completo.height)];
-        [self.labelTitulo setFrame:CGRectMake(0, 0, completo.width, self.labelTitulo.frame.size.height)];
-        posscroll = ((completo.width/2)-180)/2;
-        [self.descripcionText setFrame:CGRectMake((completo.width/2)+2, 25, (completo.width/2), 200)];
-        [self.scrollwithimage setFrame:CGRectMake(posscroll, 25,(completo.width/2)-2,200)];
-        [self.paginawebButton setFrame:CGRectMake(0, 230, completo.width, self.paginawebButton.frame.size.height)];
+        NSString *docDir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
         
-        self.scrollwithimage.contentSize = CGSizeMake(completo.width, 200);
-        orient = FALSE;
-        [self establecerimagenes:completo orientacion:orient];
+        NSString *carpeta = [docDir stringByAppendingFormat:@"/%@",[array objectAtIndex:(array.count -2)]];
         
-        [self.scroll addSubview:self.labelTitulo];
-        [self.scroll addSubview:self.descripcionText];
-        [self.scroll addSubview:self.scrollwithimage];
-        [self.scroll addSubview:self.paginawebButton];
-        [self.scroll bringSubviewToFront:self.descripcionText];
-        [self.view addSubview:self.scroll];
+        NSString *fotointerna = [NSString stringWithFormat:@"%@/%@",carpeta,nombrearchivo];
+        
+        if (!visitado) {
+            [self descargarimagen:[imagenesarray objectAtIndex:i] carpeta:carpeta foto:fotointerna];
+        }
+        NSData *imgData = [NSData dataWithContentsOfFile:fotointerna];
+        
+        UIImage *thumbNail = [[UIImage alloc] initWithData:imgData];
+        [subimage setImage:thumbNail];
+        if (i == 0) {
+            imagepost = thumbNail;
+        }
+        [self.scrollwithimage addSubview:subimage];
+        if (i == 3 ) {
+            break;
+        }
+        
     }
+    [self.indicador stopAnimating];
+    [self.indicador setHidden:YES];
+}
+
+-(void)posicionarobjetos{
+    CGSize completo = self.view.bounds.size;
+    [self.scroll setFrame:CGRectMake(0, 0, completo.width, completo.height)];
+    [self.labelTitulo setFrame:CGRectMake(0, 0, completo.width, self.labelTitulo.frame.size.height)];
+    [self.descripcionText setFrame:CGRectMake(0, 25, completo.width, self.descripcionText.frame.size.height)];
+    [self.scrollwithimage setFrame:CGRectMake(0, 230,completo.width,120)];
+    [self.paginawebButton setFrame:CGRectMake(0, 355, completo.width, self.paginawebButton.frame.size.height)];
+    
+    self.scrollwithimage.contentSize = CGSizeMake(completo.width * 2, 120);
+    //[self.indicador bringSubviewToFront:self.paginawebButton];
+    //[self.paginawebButton bringSubviewToFront:self.indicador];
+    [self.indicador startAnimating];
+    self.queue = [NSOperationQueue new];
+    NSInvocationOperation *operation = [[NSInvocationOperation alloc] initWithTarget:self
+                                                                            selector:@selector(establecerimagenes)
+                                                                              object:nil];
+    
+    [self.queue addOperation:operation];
+    //[self.queue addObserver:self forKeyPath:@"operation" options:0 context:NULL];
+    
+    [self.scroll addSubview:self.labelTitulo];
+    [self.scroll addSubview:self.descripcionText];
+    [self.scroll addSubview:self.scrollwithimage];
+    [self.scroll addSubview:self.paginawebButton];
+    [self.view addSubview:self.scroll];
 }
 
 -(void)configurartweet{
     tweet = [[TWTweetComposeViewController alloc] init];
     
-    TWTweetComposeViewControllerCompletionHandler completionHandler = 
+    TWTweetComposeViewControllerCompletionHandler completionHandler =
     ^(TWTweetComposeViewControllerResult result) {
         
         switch (result){
@@ -418,18 +304,6 @@
     [tweet setCompletionHandler:completionHandler];
 }
 
--(void)configurarfacebook{
-    [SZFacebookUtils setAppId:@"322714617838202"];
-    NSString *existingToken = @"EXISTING_TOKEN";
-    NSDate *existingExpiration = [NSDate distantFuture];
-    
-    [SZFacebookUtils linkWithAccessToken:existingToken expirationDate:existingExpiration success:^(id<SocializeFullUser> user) {
-        NSLog(@"Link successful");
-    } failure:^(NSError *error) {
-        NSLog(@"Link failed: %@", [error localizedDescription]);
-    }];
-}
-
 -(void)regresomapa:(UIBarButtonItem *)sender{
     [self.delegate cerrarinfo];
     [self.navigationController popViewControllerAnimated:YES];
@@ -442,20 +316,6 @@
     UIBarButtonItem *botonatras = [[UIBarButtonItem alloc]initWithImage:[UIImage imageNamed:flechaizquierda] style:UIBarButtonItemStylePlain target:self action:@selector(regresomapa:)];
     self.navigationItem.leftBarButtonItem = botonatras;
     [self.navigationController.navigationBar setFrame:CGRectMake(0, 0, a, 44)];
-}
-
--(void) detectOrientation {
-    /**if (([[UIDevice currentDevice] orientation] == UIDeviceOrientationLandscapeLeft) || 
-     ([[UIDevice currentDevice] orientation] == UIDeviceOrientationLandscapeRight)) {
-     
-     
-     
-     } else if ([[UIDevice currentDevice] orientation] == UIDeviceOrientationPortrait) {
-     
-     // load view 1
-     
-     } */
-    [self posicionarobjetos];
 }
 
 -(void)cambiolenguaje:(UIBarButtonItem *)sender{
@@ -516,7 +376,7 @@
     UIBarButtonItem *confButton = [[UIBarButtonItem alloc]initWithCustomView:v3];
     
     self.navigationItem.rightBarButtonItems = [NSArray arrayWithObjects:twitterButton,facebookButton,confButton, nil];
-
+    
     [self.navigationController.navigationBar setAlpha:10];
     [self.navigationController.navigationBar setTranslucent:NO];
 }
@@ -542,15 +402,26 @@
     [self iniciaslide];
 }
 
+-(void)cambio{
+    UIDevice *my = [UIDevice currentDevice];
+    [my beginGeneratingDeviceOrientationNotifications];
+    objc_msgSend([UIDevice currentDevice], @selector(setOrientation:),UIInterfaceOrientationPortrait);
+    [my endGeneratingDeviceOrientationNotifications];
+    if ([my isGeneratingDeviceOrientationNotifications]) {
+        [my endGeneratingDeviceOrientationNotifications];
+        NSLog(@"Correcto");
+    }else{
+        NSLog(@"Error");
+    }
+}
+
 #pragma mark - View lifecycle
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    appDelegate = (AppDelegate*)[[UIApplication sharedApplication]delegate];
-    [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(detectOrientation) name:@"UIDeviceOrientationDidChangeNotification" object:nil];
-    //[self configuraciones];
+    //[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(detectOrientation) name:@"UIDeviceOrientationDidChangeNotification" object:nil];
+    [self configuraciones];
 }
 
 -(void)cambiaridioma:(Idioma *)idiom{
@@ -565,13 +436,18 @@
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
         [self configuracionbotonback];
     }
-    [self configuraciones];
+    //[self configuraciones];
     //[self posicionarobjetos];
+    [self iniciaslide];
+    [self cambio];
+    
 }
 
 -(void)viewDidAppear:(BOOL)animated{
     [self setContentSizeForViewInPopover:CGSizeMake(320, 470)];
+    
 }
+
 
 - (void)viewDidUnload
 {
@@ -594,6 +470,8 @@
     [self setSharebutton:nil];
     [self setPageControl:nil];
     [self setSecondScroll:nil];
+    [self setIndicador:nil];
+    [self setLabelTitulo:nil];
     [super viewDidUnload];
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
@@ -616,14 +494,24 @@
 	pageControlBeingUsed = NO;
 }
 
+
+
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
     // Return YES for supported orientations
-	return (interfaceOrientation == UIInterfaceOrientationPortrait);
+	//return (interfaceOrientation == UIInterfaceOrientationPortrait);
+    //return NO;
+    if (interfaceOrientation == UIInterfaceOrientationPortrait){
+        return YES;
+    }else{
+        return NO;
+    }
+    //return UIInterfaceOrientationPortrait;
 }
 
+
 - (IBAction)abrirurl:(id)sender {
-    NSString *url = auxlocal.paginaweb;  
+    NSString *url = auxlocal.paginaweb;
     
     
     url = [url stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];

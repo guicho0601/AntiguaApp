@@ -11,6 +11,7 @@
 @interface MapaeniPhone ()<UIScrollViewDelegate>
 @property (strong, nonatomic) IBOutlet UIImageView *imageView;
 @property (weak, nonatomic) IBOutlet UIScrollView *scrollView;
+@property (nonatomic, retain) NSMutableArray *visitados;
 @end
 
 
@@ -20,7 +21,7 @@
 @synthesize auxlocal,auxlocacion,selectidioma,locacionesArray,localesArray,
 auxcategoria,selecciontodo,auxservicio,auxtipo,auxlogo,auxanuncios,turismo,delegate,busqueda,todoturismo;
 @synthesize titcat,titserv,tittip;
-@synthesize puntoxy;
+@synthesize puntoxy,visitados;
 
 #pragma mark - Managing the detail item
 
@@ -59,13 +60,38 @@ auxcategoria,selecciontodo,auxservicio,auxtipo,auxlogo,auxanuncios,turismo,deleg
     return punto;
 }
 
+-(BOOL)insertarnuevovisitado:(NSString *)sender{
+    NSString *t = sender;
+    BOOL b = false;
+    for (int i = 0; i < visitados.count; i++) {
+        if ([[visitados objectAtIndex:i]isEqual:t]) {
+            b = true;
+            break;
+        }
+    }
+    if (!b) {
+        [visitados addObject:t];
+        NSString *s = [NSString stringWithFormat:@""];
+        NSArray *path = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+        NSString *directorio = [path objectAtIndex:0];
+        NSString *file;
+        file = [directorio stringByAppendingFormat:@"/visitados.txt"];
+        for (int i=0; i<visitados.count; i++) {
+            s = [s stringByAppendingFormat:@"%@\n",[visitados objectAtIndex:i]];
+        }
+        [s writeToFile:file atomically:NO encoding:NSStringEncodingConversionAllowLossy error:nil];
+    }
+    return b;
+}
+
 -(void)abririnfo:(UIButton *)sender{
+    BOOL b = [self insertarnuevovisitado:sender.titleLabel.text];
+    //self.imageView.image = nil;
     [self.delegate abrioinfo];
     BOOL band = false;
     if ([selecciontodo isEqualToString:@"Todo"]) {
         for (int i=0; i < todoturismo.count; i++) {
             if ([sender.titleLabel.text isEqualToString:[todoturismo objectAtIndex:i]]) {
-                NSLog(@"%@",[todoturismo objectAtIndex:i]);
                 band = true;
                 break;
             }
@@ -76,6 +102,7 @@ auxcategoria,selecciontodo,auxservicio,auxtipo,auxlogo,auxanuncios,turismo,deleg
         [infolocal setLocalseleccionado:sender.titleLabel.text];
         [infolocal setSelectidioma:selectidioma];
         [infolocal setDelegate:self];
+        [infolocal setVisitado:b];
         [self.navigationController pushViewController:infolocal animated:YES];
     }else{
         oferta = [[Ofertas alloc]initWithNibName:nil bundle:nil];
@@ -87,7 +114,7 @@ auxcategoria,selecciontodo,auxservicio,auxtipo,auxlogo,auxanuncios,turismo,deleg
 }
 
 -(void)ubicarbotonoes{
-    int x,y;
+    int x=0,y=0;
     for (int i=0; i<[locacionesArray count]; i++) {
         locacion *aux = [locacionesArray objectAtIndex:i];
         UIImage *imagen;
@@ -101,14 +128,15 @@ auxcategoria,selecciontodo,auxservicio,auxtipo,auxlogo,auxanuncios,turismo,deleg
                 else imagen = [UIImage imageNamed:aux.logo];
             }
             if (busqueda) {
-                imagen = [UIImage imageNamed:@"admiracion.jpg"];
+                imagen = [UIImage imageNamed:@"Turismo.jpg"];
             }
-        }
+        };
         UIButton *btnDetail = [UIButton buttonWithType:UIButtonTypeCustom];
         btnDetail.frame = CGRectMake(aux.coordx,aux.coordy,imagen.size.width,imagen.size.height);
         //btnDetail.frame = CGRectMake(aux.coordx,aux.coordy,70,70);
         [btnDetail addTarget:self action:@selector(abririnfo:) forControlEvents:UIControlEventTouchUpInside];
-        [btnDetail setTitle:aux.nombrelocal forState:UIControlStateNormal];
+        NSString *t = [NSString stringWithFormat:@"%d",aux.idlocal];
+        [btnDetail setTitle:t forState:UIControlStateNormal];
         [btnDetail setImage:imagen forState:UIControlStateNormal];
         [self.imageView addSubview:btnDetail];
         [self.imageView bringSubviewToFront:btnDetail];
@@ -121,38 +149,6 @@ auxcategoria,selecciontodo,auxservicio,auxtipo,auxlogo,auxanuncios,turismo,deleg
     [self.scrollView scrollRectToVisible:CGRectMake(puntoxy.x*0.5,puntoxy.y*0.5, self.scrollView.frame.size.width,self.scrollView.frame.size.height) animated:YES];
 }
 
--(NSString *)tipodebusqueda{
-    NSString *query;
-    if ([selecciontodo isEqualToString:@"Categoria"]) {
-        query = [NSString stringWithFormat:@"select locacion.coordx, locacion.coordy, local.nombre ,local.logo from locacion,local,servicio where servicio.idservicio=local.idservicio and locacion.idlocal=local.idlocal and servicio.idservicio=%d",auxservicio.idservicio];
-        if (auxservicio.idservicio == 4) turismo = 1;
-        else turismo = 0;
-    }else if ([selecciontodo isEqualToString:@"Tipo/Categoria"]){
-        query = [NSString stringWithFormat:@"select locacion.coordx, locacion.coordy, local.nombre, local.logo from locacion,local,categoria where locacion.idlocal=local.idlocal and local.idcategoria=categoria.idcategoria and categoria.idcategoria = %d",auxcategoria.idcategoria];
-        if (auxcategoria.idservicio == 4) turismo = 1;
-        else turismo = 0;
-    }else if ([selecciontodo isEqualToString:@"Tipo"]){
-        query = [NSString stringWithFormat:@"select locacion.coordx, locacion.coordy, local.nombre, local.logo from locacion,local,clasificacion where locacion.idlocal=local.idlocal and clasificacion.idlocal=local.idlocal and clasificacion.idtipo=%d",auxtipo.idtipo];
-    }else if ([selecciontodo isEqualToString:@"Local"]){
-        query = [NSString stringWithFormat:@"select locacion.coordx, locacion.coordy, local.nombre, local.logo from locacion,local where locacion.idlocal=local.idlocal and local.idlocal=%d",auxlocal.idlocal];
-        if (auxlocal.idservicio == 4) turismo = 1;
-        else turismo = 0;
-    }else if ([selecciontodo isEqualToString:@"Anuncio"]){
-        query = [NSString stringWithFormat:@"select locacion.coordx, locacion.coordy, local.nombre, local.logo from locacion,local where locacion.idlocal=local.idlocal and local.nombre='%@'",auxanuncios.local];
-        if(auxanuncios.turistico == 1) turismo = 1;
-        else turismo = 0;
-    }else if ([selecciontodo isEqualToString:@"Todo"]){
-        query = [NSString stringWithFormat:@"select locacion.coordx, locacion.coordy, local.nombre, local.logo, local.idservicio from locacion,local where locacion.idlocal=local.idlocal"];
-        turismo = 0;
-        if (todoturismo != nil) {
-            [todoturismo removeAllObjects];
-        }else{
-            todoturismo = [[NSMutableArray alloc]init];
-        }
-    }
-    return query;
-}
-
 -(void)cargarlocaciones{
     [self limpiarimagen];
     [self.navigationController popToRootViewControllerAnimated:YES];
@@ -162,40 +158,99 @@ auxcategoria,selecciontodo,auxservicio,auxtipo,auxlogo,auxanuncios,turismo,deleg
     } else {
         locacionesArray = [[NSMutableArray alloc]init];
     }
-    sqlite3 *database;
-    sqlite3_stmt *compiledStatement;
-    if(sqlite3_open([appDelegate.databasePath UTF8String], &database) == SQLITE_OK) {
-        NSString *sqlStatement=[self tipodebusqueda];
-        
-        if(sqlite3_prepare_v2(database, [sqlStatement UTF8String], -1, &compiledStatement, NULL) == SQLITE_OK) {
-            while(sqlite3_step(compiledStatement) == SQLITE_ROW) {
-                NSString *logo,*servicio;
-                NSString *coordx = [NSString stringWithUTF8String:(char *)sqlite3_column_text(compiledStatement, 0)];
-                NSString *coordy = [NSString stringWithUTF8String:(char *)sqlite3_column_text(compiledStatement, 1)];
-                NSString *nombre = [NSString stringWithUTF8String:(char *)sqlite3_column_text(compiledStatement, 2)];
-                if (sqlite3_column_type(compiledStatement, 3)!=SQLITE_NULL) {
-                    logo = [NSString stringWithUTF8String:(char *)sqlite3_column_text(compiledStatement, 3)];
-                }
-                if ([selecciontodo isEqualToString:@"Todo"]) {
-                    servicio = [NSString stringWithUTF8String:(char *)sqlite3_column_text(compiledStatement, 4)];
-                    if ([servicio isEqualToString:@"4"]){
-                        logo = @"Turismo.png";
-                        [todoturismo addObject:nombre];
-                    }
-                }
-                locacion *localidades = [[locacion alloc]init];
-                localidades.coordx=[coordx intValue];
-                localidades.coordy=[coordy intValue];
-                localidades.nombrelocal=nombre;
-                localidades.logo = logo;
-                [locacionesArray addObject:localidades];
-            }
-        } else {
-            NSLog(@"No query");
-        }
-        sqlite3_finalize(compiledStatement);
+    
+    if (todoturismo != nil) {
+        [todoturismo removeAllObjects];
+    }else{
+        todoturismo = [[NSMutableArray alloc]init];
     }
-    sqlite3_close(database);
+    
+    NSMutableArray *adat;
+    NSError *error;
+    NSData *data;
+    
+    NSArray *path = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *directorio = [path objectAtIndex:0];
+    NSString *file;
+    file = [directorio stringByAppendingFormat:@"/lugar.txt"];
+    data = [NSData dataWithContentsOfFile:file];
+    
+    adat = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:&error];
+    for (int i=0; i<adat.count; i++){
+        NSDictionary *info = [adat objectAtIndex:i];
+        if ([selecciontodo isEqualToString:@"Categoria"]) {
+            if ([[info objectForKey:@"servicio"]intValue]==auxservicio.idservicio) {
+                locacion *aux = [[locacion alloc]init];
+                aux.idlocal = [[info objectForKey:@"idlugar"]intValue];
+                aux.logo = [info objectForKey:@"logo"];
+                aux.coordx = [[info objectForKey:@"posx"]intValue];
+                aux.coordy = [[info objectForKey:@"posy"]intValue];
+                aux.nombrelocal = [info objectForKey:@"nombre"];
+                NSString *is = [aux.logo isEqual:[NSNull null]]?nil:aux.logo;
+                if (is ==nil){
+                    aux.logo = nil;
+                }
+                [locacionesArray addObject:aux];
+                if (auxservicio.idservicio == 1) turismo = 1;
+                else turismo = 0;
+            }
+        }else if ([selecciontodo isEqualToString:@"Tipo/Categoria"]){
+            if ([[info objectForKey:@"categoria"]intValue]==auxcategoria.idcategoria) {
+                locacion *aux = [[locacion alloc]init];
+                aux.idlocal = [[info objectForKey:@"idlugar"]intValue];
+                aux.logo = [info objectForKey:@"logo"];
+                aux.coordx = [[info objectForKey:@"posx"]intValue];
+                aux.coordy = [[info objectForKey:@"posy"]intValue];
+                aux.nombrelocal = [info objectForKey:@"nombre"];
+                NSString *is = [aux.logo isEqual:[NSNull null]]?nil:aux.logo;
+                if (is ==nil){
+                    aux.logo = nil;
+                }
+                [locacionesArray addObject:aux];
+                if (auxcategoria.idservicio == 1) turismo = 1;
+                else turismo = 0;
+            }
+        }else if ([selecciontodo isEqualToString:@"Local"]){
+            if ([[info objectForKey:@"idlugar"]intValue]==auxlocal.idlocal) {
+                locacion *aux = [[locacion alloc]init];
+                aux.idlocal = [[info objectForKey:@"idlugar"]intValue];
+                aux.logo = [info objectForKey:@"logo"];
+                aux.coordx = [[info objectForKey:@"posx"]intValue];
+                aux.coordy = [[info objectForKey:@"posy"]intValue];
+                aux.nombrelocal = [info objectForKey:@"nombre"];
+                NSString *is = [aux.logo isEqual:[NSNull null]]?nil:aux.logo;
+                if (is ==nil){
+                    aux.logo = nil;
+                }
+                [locacionesArray addObject:aux];
+                if (auxlocal.idservicio == 1) turismo = 1;
+                else turismo = 0;
+            }
+        }else if ([selecciontodo isEqualToString:@"Anuncio"]){
+            if(auxanuncios.turistico == 1) turismo = 1;
+            else turismo = 0;
+        }else if ([selecciontodo isEqualToString:@"Todo"]){
+            locacion *aux = [[locacion alloc]init];
+            aux.idlocal = [[info objectForKey:@"idlugar"]intValue];
+            aux.logo = [info objectForKey:@"logo"];
+            aux.coordx = [[info objectForKey:@"posx"]intValue];
+            aux.coordy = [[info objectForKey:@"posy"]intValue];
+            aux.nombrelocal = [info objectForKey:@"nombre"];
+            NSString *is = [aux.logo isEqual:[NSNull null]]?nil:aux.logo;
+            if (is ==nil){
+                aux.logo = nil;
+            }
+            [locacionesArray addObject:aux];
+            turismo = 0;
+            if ([[info objectForKey:@"servicio"]intValue]==1) {
+                NSString *t = [NSString stringWithFormat:@"%d",aux.idlocal];
+                [todoturismo addObject:t];
+                NSLog(@"Estamos es turismo");
+            }
+        }
+        
+    }
+    
     [self ubicarbotonoes];
 }
 
@@ -240,7 +295,7 @@ auxcategoria,selecciontodo,auxservicio,auxtipo,auxlogo,auxanuncios,turismo,deleg
 -(void)cargarpreestablecidos{
     auxservicio = [[Servicio alloc]init];
     auxlogo = [[imagenlogo alloc]init];
-    auxservicio.idservicio = 4;
+    auxservicio.idservicio = 1;
     auxservicio.servicioesp = @"Turismo";
     auxservicio.servicioing = @"Tourism";
     auxservicio.icono = @"Turismo.png";
@@ -249,9 +304,26 @@ auxcategoria,selecciontodo,auxservicio,auxtipo,auxlogo,auxanuncios,turismo,deleg
     [self cargarlocaciones];
 }
 
+-(void)cargarvisitados{
+    NSArray *path = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *directorio = [path objectAtIndex:0];
+    NSString *file;
+    file = [directorio stringByAppendingFormat:@"/visitados.txt"];
+    NSString *content = [NSString stringWithContentsOfFile:file encoding:NSUTF8StringEncoding error:nil];
+    if (visitados != nil) {
+        [visitados removeAllObjects];
+    }
+    visitados = [[NSMutableArray alloc]init];
+    NSArray *array = [content componentsSeparatedByString:@"\n"];
+    for (int i = 0; i < (array.count-1); i++) {
+        [visitados addObject:[array objectAtIndex:i]];
+    }
+}
+
 #pragma mark - View lifecycle
 
 -(void)configuraciones{
+    [self cargarvisitados];
     turismo = 1;
     busqueda = false;
     titcat = titserv = tittip = @"";
@@ -275,6 +347,51 @@ auxcategoria,selecciontodo,auxservicio,auxtipo,auxlogo,auxanuncios,turismo,deleg
     [self cargarpreestablecidos];
 }
 
+-(void)imagenmapa{
+    NSLog(@"Downloading...");
+    NSString *imagen;
+    NSMutableArray *adat;
+    NSError *error =nil;
+    NSData *data;
+    
+    NSArray *path = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *directorio = [path objectAtIndex:0];
+    NSString *file;
+    file = [directorio stringByAppendingFormat:@"/mapa.txt"];
+    data = [NSData dataWithContentsOfFile:file];
+    
+    adat = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:&error];
+    for (int i=0; i<adat.count; i++){
+        NSDictionary *info = [adat objectAtIndex:i];
+        imagen = [info objectForKey:@"nombre"];
+    }
+    
+    NSURL *url = [NSURL URLWithString:imagen];
+    NSString *nombrearchivo = url.lastPathComponent;
+    
+    NSArray *array = [imagen componentsSeparatedByString:@"/"];
+    
+    NSString *docDir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+    NSFileManager *fm = [NSFileManager defaultManager];
+    
+    NSString *carpeta = [docDir stringByAppendingFormat:@"/%@",[array objectAtIndex:(array.count -2)]];
+    NSString *fotointerna = [NSString stringWithFormat:@"%@/%@",carpeta,nombrearchivo];
+    if (![fm fileExistsAtPath:carpeta]) {
+        [fm createDirectoryAtPath:carpeta withIntermediateDirectories:YES attributes:nil error:NULL];
+    }
+    
+    if (![fm fileExistsAtPath:fotointerna]) {
+        [fm removeItemAtPath:carpeta error:nil];
+        [fm createDirectoryAtPath:carpeta withIntermediateDirectories:YES attributes:nil error:NULL];
+        NSData *data3= [NSData dataWithContentsOfURL:[NSURL URLWithString:imagen]];
+        [data3 writeToFile:fotointerna atomically:YES];
+        
+    }
+    NSData *imgData = [NSData dataWithContentsOfFile:fotointerna];
+    
+    self.imageView.image = [[UIImage alloc]initWithData:imgData];
+}
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
@@ -284,7 +401,7 @@ auxcategoria,selecciontodo,auxservicio,auxtipo,auxlogo,auxanuncios,turismo,deleg
     self.scrollView.contentSize = self.imageView.image.size;
     self.scrollView.frame = CGRectMake(0, 0, 320, 460);
     self.imageView.frame = CGRectMake(0, 0, self.imageView.image.size.width, self.imageView.image.size.height);
-    appDelegate = (AppDelegate*)[[UIApplication sharedApplication]delegate];
+    [self imagenmapa];
     [self configuraciones];
 }
 
@@ -320,22 +437,24 @@ auxcategoria,selecciontodo,auxservicio,auxtipo,auxlogo,auxanuncios,turismo,deleg
 
 - (void)viewWillAppear:(BOOL)animated
 {
-    [self.scrollView scrollRectToVisible:CGRectMake(puntoxy.x*0.5,puntoxy.y*0.5, self.scrollView.frame.size.width,self.scrollView.frame.size.height) animated:YES];
-    [self.scrollView setZoomScale:0.5f];
-    
     [super viewWillAppear:YES];
+    [self.scrollView scrollRectToVisible:CGRectMake(1416*0.5,1040*0.5, self.scrollView.frame.size.width,self.scrollView.frame.size.height) animated:YES];
+    [self.scrollView setZoomScale:0.5f];
     //[self parque];
+    //[self imagenmapa];
 }
 
 - (void)viewDidAppear:(BOOL)animated
 {
     
     [super viewDidAppear:animated];
+    [self.scrollView scrollRectToVisible:CGRectMake(1416*0.5,1040*0.4, self.scrollView.frame.size.width,self.scrollView.frame.size.height) animated:YES];
 }
 
 - (void)viewWillDisappear:(BOOL)animated
 {
 	[super viewWillDisappear:animated];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIDeviceOrientationDidChangeNotification object:nil];
 }
 
 - (void)viewDidDisappear:(BOOL)animated
@@ -346,10 +465,11 @@ auxcategoria,selecciontodo,auxservicio,auxtipo,auxlogo,auxanuncios,turismo,deleg
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
     return YES;
+    //return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
 -(void) detectOrientation {
-   
+    
 }
 
 -(void)cerrarinfo{

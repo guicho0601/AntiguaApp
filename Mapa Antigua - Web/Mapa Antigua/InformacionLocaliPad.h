@@ -14,9 +14,9 @@
 #import "AppDelegate.h"
 #import "Turismo.h"
 #import "ShowImage.h"
-#import "FBShowController.h"
+#import "PostFB.h"
 
-@interface InformacionLocaliPad : UIViewController<UIActionSheetDelegate,UIScrollViewDelegate,ShowImageDelegate,FBShowDelegate>{
+@interface InformacionLocaliPad : UIViewController<UIActionSheetDelegate,UIScrollViewDelegate,ShowImageDelegate>{
     AppDelegate *appDelegate;
     TWTweetComposeViewController *tweet;
     UIActivityIndicatorView *indicador;
@@ -36,6 +36,7 @@
 @property (strong, nonatomic) IBOutlet UIButton *sharebutton;
 @property (strong, nonatomic) IBOutlet UIPageControl *pageControl;
 @property (strong, nonatomic) TWTweetComposeViewController *tweet;
+@property (strong, nonatomic) IBOutlet UIActivityIndicatorView *indicador;
 
 @property (nonatomic,retain) NSString *localseleccionado;
 

@@ -34,47 +34,47 @@
     [scrollView setZoomScale:1.0 animated:YES];
     CGSize tam = imageView.image.size;
     float ancho,alto,px,py;
-    if((UIDeviceOrientationIsPortrait([UIDevice currentDevice].orientation))){
-        CGSize completo = self.view.bounds.size;
-        if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
-            completo = CGSizeMake(320, 480);
-        }
-        if (tam.width > completo.width) {
-            float cd = tam.width/completo.width;
-            ancho = completo.width;
-            alto = tam.height/cd;
-            px = 0;
-            py = ((completo.height - alto)/2)-44;
-        }else{
-            ancho = tam.width;
-            alto = tam.height;
-            px = (completo.width - ancho)/2;
-            py = (completo.height - alto)/2;
-        }
-        [scrollView setFrame:CGRectMake(0, 0, completo.width, completo.height)];
-        [scrollView setContentSize:completo];
-        sizepop = CGSizeMake(320, 460);
-    }else{
-        CGSize completo = self.view.bounds.size;
-        if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
-            completo = CGSizeMake(480, 300);
-        }
-        if (tam.height > completo.height) {
-            float cd = tam.height / completo.height;
-            ancho = tam.width/cd;
-            alto = completo.height;
-            px = (completo.width - ancho)/2;
-            py = 0;
-        }else{
-            ancho = tam.width;
-            alto = tam.height;
-            px = (completo.width - ancho)/2;
-            py = (completo.height - alto)/2;
-        }
-        [scrollView setFrame:CGRectMake(0, 0, completo.width, completo.height)];
-        [scrollView setContentSize:completo];
-        sizepop = CGSizeMake(480,300);
+    //if((UIDeviceOrientationIsPortrait([UIDevice currentDevice].orientation))){
+    CGSize completo = self.view.bounds.size;
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+        completo = CGSizeMake(320, 420);
     }
+    if (tam.width > completo.width) {
+        float cd = tam.width/completo.width;
+        ancho = completo.width;
+        alto = tam.height/cd;
+        px = 0;
+        py = ((completo.height - alto)/2)-44;
+    }else{
+        ancho = tam.width;
+        alto = tam.height;
+        px = (completo.width - ancho)/2;
+        py = (completo.height - alto)/2;
+    }
+    [scrollView setFrame:CGRectMake(0, 0, completo.width, completo.height)];
+    [scrollView setContentSize:completo];
+    sizepop = CGSizeMake(320, 460);
+    /*}else{
+     CGSize completo = self.view.bounds.size;
+     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+     completo = CGSizeMake(480, 300);
+     }
+     if (tam.height > completo.height) {
+     float cd = tam.height / completo.height;
+     ancho = tam.width/cd;
+     alto = completo.height;
+     px = (completo.width - ancho)/2;
+     py = 0;
+     }else{
+     ancho = tam.width;
+     alto = tam.height;
+     px = (completo.width - ancho)/2;
+     py = (completo.height - alto)/2;
+     }
+     [scrollView setFrame:CGRectMake(0, 0, completo.width, completo.height)];
+     [scrollView setContentSize:completo];
+     sizepop = CGSizeMake(480,300);
+     }*/
     [imageView setFrame:CGRectMake(px, py, ancho, alto)];
 }
 
@@ -92,13 +92,17 @@
     NSURL *url = [NSURL URLWithString:nombreimagen];
     NSString *nombrearchivo = url.lastPathComponent;
     
+    NSArray *array = [nombreimagen componentsSeparatedByString:@"/"];
+    
     NSString *docDir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-    NSFileManager *fm = [NSFileManager defaultManager];
-    NSString *fotointerna = [NSString stringWithFormat:@"%@/%@",docDir,nombrearchivo];
-    if (![fm fileExistsAtPath:fotointerna]) {
-        NSData *data3= [NSData dataWithContentsOfURL:[NSURL URLWithString:nombreimagen]];
-        [data3 writeToFile:fotointerna atomically:YES];
-    }
+    //NSFileManager *fm = [NSFileManager defaultManager];
+    
+    NSString *carpeta = [docDir stringByAppendingFormat:@"/%@",[array objectAtIndex:(array.count -2)]];
+    NSString *fotointerna = [NSString stringWithFormat:@"%@/%@",carpeta,nombrearchivo];
+    /*if (![fm fileExistsAtPath:fotointerna]) {
+     NSData *data3= [NSData dataWithContentsOfURL:[NSURL URLWithString:nombreimagen]];
+     [data3 writeToFile:fotointerna atomically:YES];
+     }*/
     NSData *imgData = [NSData dataWithContentsOfFile:fotointerna];
     UIImage *thumbNail = [[UIImage alloc] initWithData:imgData];
     [imageView setImage:thumbNail];
@@ -136,8 +140,9 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(detectOrientation) name:@"UIDeviceOrientationDidChangeNotification" object:nil];
+    [[UIDevice currentDevice] endGeneratingDeviceOrientationNotifications];
+    //[[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
+    //[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(detectOrientation) name:@"UIDeviceOrientationDidChangeNotification" object:nil];
 }
 
 - (void)viewDidUnload
@@ -175,3 +180,4 @@
 }
 
 @end
+

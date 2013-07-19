@@ -15,6 +15,7 @@
 @implementation SplitiPhone{
     UIView *tempview;
     UIImageView *viimg;
+    BOOL bandtut;
 }
 @synthesize menu;
 @synthesize anuncios;
@@ -48,9 +49,10 @@
         heightall = self.view.bounds.size.height;
         [mapaiphone.navigationController.navigationBar setFrame:CGRectMake(0, 0, 320, 44)];
         if (!showmenu) {
-//            OCULTAR VERTICAL
-            [self.menu setFrame:CGRectMake(0, 0, 0, heightall-70)];
-            [self.anuncios setFrame:CGRectMake(0, heightall-70, 0, 70)];
+            //            OCULTAR VERTICAL
+            //[self.menu setFrame:CGRectMake(0, 0, 0, heightall-70)];
+            //[self.anuncios setFrame:CGRectMake(0, heightall-70, 0, 70)];
+            [self.menu setFrame:CGRectMake(0, 0, 0, heightall)];
             [self.mapa setFrame:CGRectMake(0, 0, 320, heightall)];
             [menuimage setFrame:CGRectMake( 0,heightall-120, 40, 40)];
             [settimage setFrame:CGRectMake(0,heightall-80, 40, 40)];
@@ -59,19 +61,21 @@
             [self.mapa setUserInteractionEnabled:YES];
             [self.menuimage setImage:[UIImage imageNamed:casita]];
         }else{
-//            MOSTRAR VERTICAL
-            [menu setFrame:CGRectMake(0, 0, widhtall-40, heightall-100)];
+            //            MOSTRAR VERTICAL
+            //            [menu setFrame:CGRectMake(0, 0, widhtall-40, heightall-100)];
+            [menu setFrame:CGRectMake(0, 0, widhtall-40, heightall)];
             //[servicios.view setFrame:CGRectMake(0, 0, 300, 460)];
             [navigatormaster.view setFrame:CGRectMake(0, 0, widhtall-40, heightall)];
             [mapa setFrame:CGRectMake(widhtall-40, 0, navigatormapa.view.frame.size.width, navigatormapa.view.frame.size.height)];
             
-            [anuncios setFrame:CGRectMake(0, heightall-100, widhtall-40, 100)];
+            //[anuncios setFrame:CGRectMake(0, heightall-100, widhtall-40, 100)];
+            [anuncios setFrame:CGRectMake(0, 0, 0, 0)];
             anun = [[AnunciantesiPhoneVer alloc]initWithNibName:nil bundle:nil];
             [anun setDetailViewController:mapaiphone];
             [anun setDelegate:self];
             [anun.view setFrame:CGRectMake(0, 0, widhtall-40, 125)];
-            [anuncios addSubview:anun.view];
-            [anuncios bringSubviewToFront:anun.view];
+            //[anuncios addSubview:anun.view];
+            //[anuncios bringSubviewToFront:anun.view];
             
             [self.navigationController.navigationBar setHidden:YES];
             [self.menuimage setFrame:CGRectMake(widhtall-40, heightall-120, 40, 40)];
@@ -102,10 +106,11 @@
                     
                 default:
                     break;
-            }    
+            }
             [self.mapa setUserInteractionEnabled:NO];
             [self.menuimage setImage:[UIImage imageNamed:casitaroja]];
         }
+        
     }else{
         widhtall = self.view.bounds.size.width;
         heightall = self.view.bounds.size.height;
@@ -115,7 +120,7 @@
             [mapaiphone.navigationController.navigationBar setFrame:CGRectMake(0, 0, 480, 22)];
         }
         if (!showmenu) {
-//            OCULTAR HORIZONTAL
+            //            OCULTAR HORIZONTAL
             [self.menu setFrame:CGRectMake(0, 0, 0, heightall-70)];
             [self.anuncios setFrame:CGRectMake(0, heightall-70, 0, 70)];
             [self.mapa setFrame:CGRectMake(0, 0, widhtall, heightall)];
@@ -127,33 +132,34 @@
             [self.menuimage setImage:[UIImage imageNamed:casita]];
             
         }else{
-//            MOSTRAR HORIZONTAL
-            [self.menu setFrame:CGRectMake(0, 0, widhtall-40, heightall-100)];
-            [navigatormaster.view setFrame:CGRectMake(0, 0, widhtall-40, heightall-100)];
+            //            MOSTRAR HORIZONTAL
+            //[self.menu setFrame:CGRectMake(0, 0, widhtall-40, heightall-100)];
+            [self.menu setFrame:CGRectMake(0, 0, widhtall-40, heightall)];
+            [navigatormaster.view setFrame:CGRectMake(0, 0, widhtall-40, heightall)];
             int a=[navigatormaster.viewControllers count];
             switch (a) {
                 case 1:
                     [servicios.navigationController.navigationBar setFrame:CGRectMake(0, 0, widhtall-40, 32)];
-                    [servicios.view setFrame:CGRectMake(0, 0, widhtall-40, heightall-50)];
+                    [servicios.view setFrame:CGRectMake(0, 0, widhtall-40, heightall)];
                     break;
                 case 2:
                     [categorias.navigationController.navigationBar setFrame:CGRectMake(0, 0, widhtall-40, 32)];
-                    [categorias.view setFrame:CGRectMake(0, 0, widhtall-40, heightall-50)];
+                    [categorias.view setFrame:CGRectMake(0, 0, widhtall-40, heightall)];
                     break;
                     
                 case 3:
                     if (restaurante.comida == 1) {
                         [tipos.navigationController.navigationBar setFrame:CGRectMake(0, 0, widhtall-40, 32)];
-                        [tipos.view setFrame:CGRectMake(0, 0, widhtall-40, heightall-50)];
+                        [tipos.view setFrame:CGRectMake(0, 0, widhtall-40, heightall)];
                     }else{
                         [locales.navigationController.navigationBar setFrame:CGRectMake(0, 0, widhtall-40, 32)];
-                        [locales.view setFrame:CGRectMake(0, 0, widhtall-40, heightall-50)];
+                        [locales.view setFrame:CGRectMake(0, 0, widhtall-40, heightall)];
                     }
                     break;
                     
                 case 4:
                     [locales.navigationController.navigationBar setFrame:CGRectMake(0, 0, widhtall-40, 32)];
-                    [locales.view setFrame:CGRectMake(0, 0, widhtall-40, heightall-50)];
+                    [locales.view setFrame:CGRectMake(0, 0, widhtall-40, heightall)];
                     break;
                     
                 default:
@@ -164,9 +170,10 @@
             [anunh setDelegate:self];
             [anunh setDetailViewController:mapaiphone];
             [anunh.view setFrame:CGRectMake(0, 0, widhtall-40, 100)];
-            [self.anuncios setFrame:CGRectMake(0, heightall-100, widhtall-40, 100)];
-            [self.anuncios addSubview:anunh.view];
-            [self.anuncios bringSubviewToFront:anunh.view];
+            //[self.anuncios setFrame:CGRectMake(0, heightall-100, widhtall-40, 100)];
+            //[self.anuncios addSubview:anunh.view];
+            //[self.anuncios bringSubviewToFront:anunh.view];
+            [self.anuncios setFrame:CGRectMake(0, 0,0, 0)];
             
             [mapa setFrame:CGRectMake(widhtall-40, 0, 480, heightall)];
             [menuimage setFrame:CGRectMake( widhtall-40,heightall-120, 40, 40)];
@@ -176,6 +183,7 @@
             [self.mapa setUserInteractionEnabled:NO];
             [self.menuimage setImage:[UIImage imageNamed:casitaroja]];
         }
+        
     }
 }
 
@@ -184,7 +192,7 @@
     [UIView setAnimationDuration:0.25];
     if (showmenu) {
         if (UIDeviceOrientationIsPortrait(self.interfaceOrientation)){
-//            OCULTAR VERTICAL
+            //            OCULTAR VERTICAL
             [self.menu setFrame:CGRectMake(0, 0, 0, heightall-70)];
             [self.separador setFrame:CGRectMake(0, heightall-70, 0, 70)];
             [self.mapa setFrame:CGRectMake(0, 0, widhtall, heightall)];
@@ -194,7 +202,7 @@
             [self.areas setFrame:CGRectMake(0, heightall-20, widhtall, 20)];
             [self.mapa setUserInteractionEnabled:YES];
         }else{
-//            OCULTAR HORIZONAL
+            //            OCULTAR HORIZONAL
             [self.menu setFrame:CGRectMake(0, 0, 0, heightall-70)];
             [self.anuncios setFrame:CGRectMake(0, heightall-70, 0, 70)];
             [self.mapa setFrame:CGRectMake(0, 0, widhtall, heightall)];
@@ -219,21 +227,22 @@
         widhtall = self.view.bounds.size.width;
         heightall = self.view.bounds.size.height;
         if (!showmenu) {
-//            MOSTRAR MENU VERTICAL
-                        
-            [menu setFrame:CGRectMake(0, 0, widhtall-40, heightall-100)];
+            //            MOSTRAR MENU VERTICAL
+            
+            //[menu setFrame:CGRectMake(0, 0, widhtall-40, heightall-100)];
+            [menu setFrame:CGRectMake(0, 0, widhtall-40, heightall)];
             //[servicios.view setFrame:CGRectMake(0, 0, 300, 460)];
             [navigatormaster.view setFrame:CGRectMake(0, 0, widhtall-40, heightall)];
             [mapa setFrame:CGRectMake(widhtall-40, 0, navigatormapa.view.frame.size.width, navigatormapa.view.frame.size.height)];
             
-            [anuncios setFrame:CGRectMake(0, heightall-100, widhtall-40, 100)];
+            //[anuncios setFrame:CGRectMake(0, heightall-100, widhtall-40, 100)];
             anun = [[AnunciantesiPhoneVer alloc]initWithNibName:nil bundle:nil];
             [anun setDetailViewController:mapaiphone];
             [anun setDelegate:self];
             [anun.view setFrame:CGRectMake(0, 0, widhtall-40, 125)];
             [anuncios addSubview:anun.view];
             [anuncios bringSubviewToFront:anun.view];
-            
+            [anuncios setFrame:CGRectMake(0, 0, 0, 0)];
             
             
             [self.navigationController.navigationBar setHidden:YES];
@@ -270,8 +279,8 @@
             [self.mapa setUserInteractionEnabled:NO];
             
             showmenu = true;
-        }else{  
-//            OCULTAR MENU VERTICAL
+        }else{
+            //            OCULTAR MENU VERTICAL
             [self.menu setFrame:CGRectMake(0, 0, 0, heightall-70)];
             [self.separador setFrame:CGRectMake(0, heightall-70, 0, 70)];
             [self.mapa setFrame:CGRectMake(0, 0, widhtall, heightall)];
@@ -287,28 +296,29 @@
         widhtall = self.view.bounds.size.width;
         heightall = self.view.bounds.size.height;
         if (!showmenu) {
-//            MOSTRAR MENU HORIZONTAL
-                        
-            [self.menu setFrame:CGRectMake(0, 0, widhtall-40, heightall-100)];
-            [navigatormaster.view setFrame:CGRectMake(0, 0, widhtall-40, heightall-100)];
+            //            MOSTRAR MENU HORIZONTAL
+            
+            //[self.menu setFrame:CGRectMake(0, 0, widhtall-40, heightall-100)];
+            [self.menu setFrame:CGRectMake(0, 0, widhtall-40, heightall)];
+            [navigatormaster.view setFrame:CGRectMake(0, 0, widhtall-40, heightall)];
             int a=[navigatormaster.viewControllers count];
             switch (a) {
                 case 1:
                     [servicios.navigationController.navigationBar setFrame:CGRectMake(0, 0, widhtall-40, 32)];
-                    [servicios.view setFrame:CGRectMake(0, 0, widhtall-40, heightall-50)];
+                    [servicios.view setFrame:CGRectMake(0, 0, widhtall-40, heightall)];
                     break;
                 case 2:
                     [categorias.navigationController.navigationBar setFrame:CGRectMake(0, 0, widhtall-40, 32)];
-                    [categorias.view setFrame:CGRectMake(0, 0, widhtall-40, heightall-50)];
+                    [categorias.view setFrame:CGRectMake(0, 0, widhtall-40, heightall)];
                     break;
                     
                 case 3:
                     if (restaurante.comida == 1) {
                         [tipos.navigationController.navigationBar setFrame:CGRectMake(0, 0, widhtall-40, 32)];
-                        [tipos.view setFrame:CGRectMake(0, 0, widhtall-40, heightall-50)];
+                        [tipos.view setFrame:CGRectMake(0, 0, widhtall-40, heightall)];
                     }else{
                         [locales.navigationController.navigationBar setFrame:CGRectMake(0, 0, widhtall-40, 32)];
-                        [locales.view setFrame:CGRectMake(0, 0, widhtall-40, heightall-50)];
+                        [locales.view setFrame:CGRectMake(0, 0, widhtall-40, heightall)];
                     }
                     break;
                     
@@ -325,9 +335,10 @@
             [anunh setDelegate:self];
             [anunh setDetailViewController:mapaiphone];
             [anunh.view setFrame:CGRectMake(0, 0, widhtall-40, 100)];
-            [self.anuncios setFrame:CGRectMake(0, heightall-100, widhtall-40, 100)];
+            //            [self.anuncios setFrame:CGRectMake(0, heightall-100, widhtall-40, 100)];
             [self.anuncios addSubview:anunh.view];
             [self.anuncios bringSubviewToFront:anunh.view];
+            [self.anuncios setFrame:CGRectMake(0, 0,0,0)];
             
             [mapa setFrame:CGRectMake(widhtall-40, 0, 480, heightall)];
             [menuimage setFrame:CGRectMake( widhtall-40,heightall-120, 40, 40)];
@@ -339,7 +350,7 @@
             
             showmenu = true;
         }else{
-//            OCULTAR MENU HORIZONTAL
+            //            OCULTAR MENU HORIZONTAL
             [self.menu setFrame:CGRectMake(0, 0, 0, heightall-70)];
             [self.anuncios setFrame:CGRectMake(0, heightall-70, 0, 70)];
             [self.mapa setFrame:CGRectMake(0, 0, widhtall, heightall)];
@@ -367,7 +378,7 @@
         mensaje = @"Seleccion el idioma de su preferencia";
         cancelar = @"Cancelar";
     }
-        
+    
     UIActionSheet *language = [[UIActionSheet alloc]initWithTitle:mensaje delegate:self cancelButtonTitle:cancelar destructiveButtonTitle:nil otherButtonTitles:@"English",@"Español", nil];
     [language setActionSheetStyle:UIActionSheetStyleBlackTranslucent];
     [language showInView:self.view];
@@ -421,16 +432,19 @@
     if (selectidioma.idioma == 0){
         img = @"ingles1.png";
     }
-    else{ 
+    else{
         img = @"Min_Tutorial.png";
     }
     return img;
 }
 
 -(void)iniciartempview{
+    
+    
     viimg = [[UIImageView alloc]initWithImage:[UIImage imageNamed:[self imagentutorial]]];
-    float locx = (self.view.bounds.size.width - viimg.image.size.width )/2;
+    float locx = ([[UIScreen mainScreen]bounds].size.width/2)-(viimg.image.size.width/2);
     tempview = [[UIView alloc]init];
+    [tempview setAutoresizingMask:UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin ];
     [tempview addSubview:viimg];
     [tempview setFrame:CGRectMake(locx, self.view.bounds.size.height, viimg.image.size.width, viimg.image.size.height)];
     [tempview setBackgroundColor:[UIColor blackColor]];
@@ -456,7 +470,8 @@
     [UIView beginAnimations:nil context:nil];
     [UIView setAnimationDuration:0.75];
     float locx = (self.view.bounds.size.width - viimg.image.size.width )/2;
-    [tempview setFrame:CGRectMake(locx, self.view.bounds.size.height,viimg.image.size.width ,viimg.image.size.height)];
+    //[tempview setFrame:CGRectMake(locx, [[UIScreen mainScreen]bounds].size.height ,viimg.image.size.width ,viimg.image.size.height)];
+    [tempview setFrame:CGRectMake(locx, [[UIScreen mainScreen]bounds].size.height ,tempview.frame.size.width ,0)];
     [UIView commitAnimations];
 }
 
@@ -464,7 +479,8 @@
     [UIView beginAnimations:nil context:nil];
     [UIView setAnimationDuration:0.75];
     float locx = (self.view.bounds.size.width - viimg.image.size.width )/2;
-    [tempview setFrame:CGRectMake(locx, self.view.bounds.size.height,viimg.image.size.width ,viimg.image.size.height)];
+    //    [tempview setFrame:CGRectMake(locx, [[UIScreen mainScreen]bounds].size.height ,viimg.image.size.width ,viimg.image.size.height)];
+    [tempview setFrame:CGRectMake(locx, [[UIScreen mainScreen]bounds].size.height ,tempview.frame.size.width ,0)];
     [UIView commitAnimations];
 }
 
@@ -540,7 +556,8 @@
     [menuclose setDirection:UISwipeGestureRecognizerDirectionLeft];
     [menu addGestureRecognizer:menuclose];
     
-    [anuncios setBackgroundColor:[UIColor redColor]];
+    //[anuncios setBackgroundColor:[UIColor redColor]];
+    [anuncios setHidden:YES];
     
     [servicios.navigationController.navigationBar setTintColor:[UIColor blackColor]];
     
@@ -702,6 +719,7 @@
     [settimage setHidden:YES];
     [menuimage setHidden:YES];
     [brujula setHidden:YES];
+    [[UIDevice currentDevice] endGeneratingDeviceOrientationNotifications];
 }
 
 -(void)cerroinfo{
@@ -713,6 +731,7 @@
     }else{
         [mapaiphone.navigationController.navigationBar setFrame:CGRectMake(0, 0,self.view.bounds.size.width , 44)];
     }
+    [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
 }
 
 @end

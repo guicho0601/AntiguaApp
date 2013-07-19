@@ -1,4 +1,4 @@
-//
+
 //  Informacionlocal.h
 //  Aqui en... Antigua
 //
@@ -9,19 +9,17 @@
 #import <UIKit/UIKit.h>
 #import <Twitter/TWTweetComposeViewController.h>
 #import <MobileCoreServices/MobileCoreServices.h>
-#import "Idioma.h"
+#import "PostFB.h"
 #import "local.h"
-#import "AppDelegate.h"
+#import "Idioma.h"
 #import "Turismo.h"
 #import "ShowImage.h"
-#import "FBShowController.h"
 
 @protocol Infolocaldelegate <NSObject>
 -(void)cerrarinfo;
 @end
 
-@interface Informacionlocal : UIViewController<UIActionSheetDelegate,UIScrollViewDelegate,FBShowDelegate,UIPopoverControllerDelegate>{
-    AppDelegate *appDelegate;
+@interface Informacionlocal : UIViewController<UIActionSheetDelegate,UIScrollViewDelegate,UIPopoverControllerDelegate>{
     TWTweetComposeViewController *tweet;
     
     UIImageView *imagenselect;
@@ -31,6 +29,7 @@
     BOOL pageControlBeingUsed;
     
     __weak id<Infolocaldelegate> delegate;
+    
 }
 
 @property (strong, nonatomic) IBOutlet UILabel *labelTitulo;
@@ -55,6 +54,11 @@
 @property (nonatomic,retain) Turismo *turista;
 
 @property(weak,nonatomic) id<Infolocaldelegate> delegate;
+
+@property (nonatomic,retain) NSOperationQueue *queue;
+@property (strong, nonatomic) IBOutlet UIActivityIndicatorView *indicador;
+
+@property (nonatomic) BOOL visitado;
 
 -(void)cargarinfolocal;
 -(void)cambiaridioma:(Idioma *)idiom;
